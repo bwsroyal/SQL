@@ -1,0 +1,55 @@
+/* Create tables about famous authors and their published works. */
+
+CREATE TABLE authors 
+    (id INTEGER PRIMARY KEY,
+    first_name TEXT,
+    last_name TEXT,
+    dob TEXT,
+    hometown TEXT)
+;
+
+INSERT INTO authors (first_name, last_name, dob, hometown) 
+    VALUES 
+    ("George", "Orwell", "1903-06-25", "Oxfordshire"),
+    ("Stephen", "King", "1947-09-21", "Portland, ME"),
+    ("Charles", "Dickens", "1812-02-07", "Portsmouth"),
+    ("William", "Styron", "1925-06-11", "Newport News, VA"),
+    ("H.P.", "Lovecraft", "1890-08-20", "Providence, RI"),
+    ("John", "Grisham", "1955-02-08", "Jonesboro, AK")
+;
+
+SELECT * FROM authors
+;
+
+CREATE TABLE books
+    (id INTEGER PRIMARY KEY,
+    title TEXT,
+    author_id INTEGER)
+;
+
+INSERT INTO books (title, author_id)
+    VALUES 
+    ("1984", 1),
+    ("It", 2),
+    ("A Christmas Carol", 3),
+    ("The Firm", 6),
+    ("The Pelican Brief", 6),
+    ("Sophie's Choice", 4),
+    ("Set This House On Fire", 4),
+    ("Carrie", 2),
+    ("Animal Farm", 1),
+    ("The Call of Cthulhu", 5),
+    ("In the Vault", 5),
+    ("Salem's Lot", 2),
+    ("Lie Down In Darkness", 4),
+    ("The Confessions of Nat Turner", 4),
+    ("The Shining", 2),
+    ("A Time to Kill", 6)
+;
+
+--Pull data to show authorship of each book in the table.
+SELECT authors.first_name, authors.last_name, books.title 
+    FROM authors
+    JOIN books
+    ON authors.id = books.author_id
+    ORDER BY authors.last_name
