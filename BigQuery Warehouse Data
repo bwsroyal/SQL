@@ -1,0 +1,67 @@
+/*How many orders are shipped to each state?*/
+SELECT
+  w.state as state,
+  COUNT (DISTINCT o.order_id) as num_orders
+FROM
+  warehouse_orders.Orders o
+JOIN
+  warehouse_orders.Warehouse w ON o.warehouse_id = w.warehouse_id
+GROUP BY
+  w.state
+;
+
+/*How much does each warehouse contribute to our overall order fulfillment? Exclude the warehouses that are under construction.*/
+SELECT 
+  orders.warehouse_id,
+  CONCAT(warehouse.state,': ',warehouse.warehouse_alias) AS warehouse_name,
+  COUNT (order_id) AS number_of_orders,
+  (SELECT COUNT(*) 
+    FROM warehouse_orders.Orders) AS total_orders,
+  CASE
+    WHEN COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) <=0.1
+      THEN "fulfilled 0-10% of Orders"
+    WHEN COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) >0.1
+      AND COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) <=0.2
+      THEN "Fulfilled 11-20% of Orders"
+    WHEN COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) >0.2
+      AND COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) <=0.3
+      THEN "Fulfilled 21-30% of Orders"
+    WHEN COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) >0.3
+      AND COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) <=0.4
+      THEN "Fulfilled 31-40% of Orders"
+    WHEN COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) >0.4
+      AND COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders) <=0.5
+      THEN "Fulfilled 41-50% of Orders"
+    ELSE "Fulfilled more than 50% of Orders"
+    END AS fulfillment_summary
+FROM
+  warehouse_orders.Orders orders
+LEFT JOIN warehouse_orders.Warehouse warehouse
+  ON orders.warehouse_id = warehouse.warehouse_id
+GROUP BY
+  orders.warehouse_id,
+  warehouse_name
+HAVING
+  COUNT(orders.order_id) >0
+;
+
+
+/*The first chart is helpful. But what is the exact percentage that each warehouse contributes to overall order fulfillment? Again, exclude the warehouses that are currently under construction.*/
+
+SELECT 
+  orders.warehouse_id,
+  CONCAT(warehouse.state,': ',warehouse.warehouse_alias) AS warehouse_name,
+  COUNT (order_id) AS number_of_orders,
+  (SELECT COUNT(*) 
+    FROM warehouse_orders.Orders) AS total_orders,
+  CONCAT(ROUND(COUNT(order_id)/(SELECT COUNT(*) FROM warehouse_orders.Orders)*100,2),'%') AS fulfillment_summary
+FROM
+  warehouse_orders.Orders orders
+LEFT JOIN warehouse_orders.Warehouse warehouse
+  ON orders.warehouse_id = warehouse.warehouse_id
+GROUP BY
+  orders.warehouse_id,
+  warehouse_name
+HAVING
+  COUNT(orders.order_id) >0
+;
