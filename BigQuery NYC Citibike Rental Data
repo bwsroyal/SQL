@@ -47,7 +47,8 @@ FROM
     ORDER BY
       number_of_rides DESC
 ;
-/*Casting was necessary because the start_station_id on the citibike_trips table is coded as INTEGER while the start_station_id on the citibike_stations table is coded as STRING.*/
+--Casting was necessary because the start_station_id on the citibike_trips table is coded 
+--as INTEGER while the start_station_id on the citibike_stations table is coded as STRING.
 
 
 
@@ -70,7 +71,8 @@ WHERE
 ORDER BY
   CAST(station_id AS FLOAT64)
 ;
-/*Casting was necessary because the start_station_id on the citibike_trips table is coded as INTEGER while the start_station_id on the citibike_stations table is coded as STRING.*/
+--Casting was necessary because the start_station_id on the citibike_trips table is coded 
+--as INTEGER while the start_station_id on the citibike_stations table is coded as STRING.
 
 
 /*How many rides did customers take on these bikes per year*/
@@ -88,7 +90,8 @@ ORDER BY
 ;
 
 
-/*Create a temporary table to filter out the bike trips that were one hour or longer. The schema indicates that tripduration is recorded in seconds.*/
+--Create a temporary table to filter out the bike trips that were one hour or longer. The 
+--schema indicates that tripduration is recorded in seconds.
 
 WITH trips_over_1_hr AS (
   SELECT *
