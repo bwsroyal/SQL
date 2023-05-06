@@ -1,0 +1,67 @@
+/*Which Austin Bikeshare bike has been rented most frequently, and which station is it most frequently rented from?*/
+WITH most_frequent_rental AS(
+  SELECT
+    bikeid,
+    COUNT(trip_id) AS times_rented,
+  FROM
+    bigquery-public-data.austin_bikeshare.bikeshare_trips
+  GROUP BY
+    bikeid
+  ORDER BY
+    times_rented DESC
+  LIMIT 1
+  )
+
+SELECT
+  most.bikeid,
+  trips.start_station_id,
+  COUNT(trips.start_station_id) AS total_rental_from_station
+FROM
+  most_frequent_rental AS most
+INNER JOIN
+  bigquery-public-data.austin_bikeshare.bikeshare_trips AS trips
+  ON most.bikeid = trips.bikeid
+GROUP BY
+  most.bikeid,
+  trips.start_station_id
+ORDER BY
+  total_rental_from_station DESC,
+  trips.start_station_id,
+  most.bikeid
+LIMIT 1
+;
+##bikeid 559 is most often rented from start_station_id 3798.
+
+
+/*Which Austin Bikeshare bike has the greatest total duration of rental time, and which station is it most frequently rented from?*/
+
+WITH longest_used_bike AS(
+  SELECT
+    bikeid,
+    SUM(duration_minutes) AS trip_duration
+  FROM
+    bigquery-public-data.austin_bikeshare.bikeshare_trips
+  GROUP BY
+    bikeid
+  ORDER BY
+    trip_duration DESC
+  LIMIT 1
+  )
+
+SELECT
+  longest.bikeid,
+  trips.start_station_id,
+  COUNT(*) AS trip_ct
+FROM
+  longest_used_bike AS longest
+INNER JOIN
+  bigquery-public-data.austin_bikeshare.bikeshare_trips AS trips
+ON longest.bikeid = trips.bikeid
+GROUP BY
+  trips.start_station_id,
+  longest.bikeid
+ORDER BY
+  trip_ct DESC
+LIMIT 1
+
+##bikeid 559 has the greatest total duration of rental time, and it is most often rented from start_station_id 3798.
