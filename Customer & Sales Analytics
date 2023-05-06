@@ -1,0 +1,157 @@
+/*Analyze sales of music downloads from the B.I.T. Chinook Music database.*/
+
+--Create a list of customers (full names, customer ID, and country) who are not in the US.
+SELECT FirstName, LastName, CustomerId, Country
+FROM chinook.customers
+WHERE Country <> 'USA'
+;
+
+
+--Create a list of Customers from Brazil.
+SELECT * 
+FROM chinook.customers
+WHERE COUNTRY = 'Brazil'
+;
+
+
+--Find the Invoices of customers who are in Brazil. Create a table that includes customers’ full names, Invoice ID, Date of the invoice, and billing country.
+SELECT c.FirstName ||",  "|| c.LastName AS Name, i.InvoiceId, i.InvoiceDate, i.BillingCountry
+FROM chinook.customers c
+LEFT JOIN chinook.invoices i
+ON c.CustomerId = i.CustomerId
+WHERE i.BillingCountry = 'Brazil'
+ORDER BY LastName DESC, InvoiceID ASC
+;
+
+
+--Create a list of the Employees who are Sales Agents.
+SELECT * 
+FROM chinook.employees
+WHERE Title = 'Sales Support Agent'
+;
+
+
+--Create a list of billing countries from the Invoice table.
+SELECT DISTINCT (BillingCountry) 
+FROM chinook.invoices
+;
+
+
+--Create a table that shows the invoices associated with each sales agent. Include the Sales Agent's full name.
+SELECT e.LastName ||",  "|| e.FirstName AS "Employee", i.InvoiceId
+FROM chinook.employees e
+JOIN chinook.customers c
+ON e.EmployeeId = c.SupportRepId
+JOIN chinook.invoices i
+ON c.CustomerId = i.CustomerId
+;
+
+
+--Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.
+SELECT i.Total AS "Invoice Total", c.FirstName||" "||c.LastName AS "Customer Name", c.Country AS "Country", e.LastName||", "||e.FirstName AS "Sales Rep"
+FROM chinook.invoices i
+JOIN chinook.customers c
+ON i.CustomerID = c.CustomerId
+JOIN chinook.employees e
+ON c.SupportRepId = e.EmployeeId
+;
+
+
+--How many Invoices were there in 2009?
+SELECT COUNT (*) 
+FROM chinook.invoices
+WHERE InvoiceDate BETWEEN "2009-01-01" AND "2009-12-31"
+;
+--83
+
+
+--What are the total sales for 2009?
+SELECT SUM(Total) 
+FROM chinook.invoices
+WHERE InvoiceDate BETWEEN "2009-01-01" AND "2009-12-31"
+;
+--449.46
+
+
+--Create a table that includes the entire catalogue of tracks. Include the Album name, Media type, and Genre.
+SELECT t.Name AS "Track Name", a.Title AS "Album", m.Name AS "Media Type", g.Name AS "Genre"
+FROM chinook.tracks t
+JOIN chinook.albums a
+ON t.AlbumId = a.AlbumId
+JOIN chinook.media_types m
+ON t.MediaTypeId = m.MediaTypeId
+JOIN chinook.genres g
+ON t.GenreId = g.GenreId
+;
+
+
+--Show the total sales made by each sales agent.
+SELECT e.EmployeeId AS "ID", e.LastName ||",  "|| e.FirstName AS "Sales Agent", ROUND(SUM(i.Total), 2) AS "Total Sales"
+FROM chinook.employees e
+JOIN chinook.customers c
+ON e.EmployeeId = c.SupportRepId
+JOIN chinook.invoices i
+ON c.CustomerId = i.CustomerId
+WHERE e.Title = "Sales Support Agent"
+GROUP BY e.EmployeeId
+;
+
+
+--Which sales agent made the most in sales in 2009?
+SELECT e.EmployeeId AS "ID", e.LastName ||",  "||e.FirstName AS "Sales Agent", ROUND(SUM(i.Total), 2) AS "Total Sales"
+FROM chinook.employees e
+JOIN chinook.customers c
+ON e.EmployeeId = c.SupportRepId
+JOIN chinook.invoices i
+ON c.CustomerId = i.CustomerId
+WHERE e.Title = 'Sales Support Agent' AND i.InvoiceDate BETWEEN '2009-01-01' AND '2009-12-31'
+GROUP BY e.EmployeeId
+ORDER BY "Total Sales" DESC LIMIT 1
+;
+--Steve Johnson
+
+
+--How many tracks were sold more than one time?
+SELECT COUNT(TrackID)
+FROM(
+SELECT TrackId, COUNT(TrackId) AS "Count"
+FROM chinook.invoice_items
+GROUP BY TrackId
+HAVING Count > 1
+ORDER BY TrackId
+)
+;
+--256
+
+
+--List the tracks that sold multiple times. Include the names of the artists who recorded them.
+SELECT t.Name AS "Track", i.TrackId AS "Track ID", art.Name AS "Artist", COUNT(i.TrackId) AS "Count"
+FROM chinook.invoice_items i
+JOIN chinook.tracks t
+ON i.TrackId = t.TrackId
+JOIN chinook.albums alb
+ON t.AlbumId = alb.AlbumId
+JOIN chinook.artists art
+ON alb.AlbumId = art.ArtistId
+GROUP BY i.TrackId
+HAVING Count > 1
+ORDER BY i.TrackId
+;
+
+
+--Which artists are the top 5 selling the most tracks?
+SELECT Artist, COUNT (Artist) AS "Count"
+FROM (
+SELECT i.InvoiceId, i.TrackId, art.Name AS "Artist"
+FROM chinook.invoice_items i
+JOIN chinook.tracks t
+ON i.TrackId = t.TrackId
+JOIN chinook.albums alb
+ON t.AlbumId = alb.AlbumId
+JOIN chinook.artists art
+ON alb.AlbumId = art.ArtistId
+)
+GROUP BY Artist
+ORDER By Count DESC
+LIMIT 5
+--Frank Zappa & Captain Beefheart, The Police, Vinícius E Qurteto Em Cy, Barry Wordsworth & BBC Concert Orchestra, Ed Motta
