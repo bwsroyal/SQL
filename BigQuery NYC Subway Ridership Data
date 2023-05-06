@@ -1,0 +1,37 @@
+/*What was the change in weekly ridership from 2013 to 2014?*/
+
+SELECT
+  station_name,
+  ridership_2013,
+  ridership_2014,
+  ridership_2014 - ridership_2013 AS change_2014_raw
+FROM
+  bigquery-public-data.new_york_subway.subway_ridership_2013_present
+;
+
+
+/*What was the average weekly ridership for the multi-year period 2013-2016?*/
+SELECT
+  station_name,
+  ridership_2013,
+  ridership_2014,
+  ridership_2015,
+  ridership_2016,
+  (ridership_2013 + ridership_2014 + ridership_2015 + ridership_2016) / 4 AS average_2013_2016
+FROM
+  bigquery-public-data.new_york_subway.subway_ridership_2013_present
+;
+
+
+/*What was the average weekly ridership for the multi-year period 2016-2018 for the Atlantic Av - Barclays Ctr station?*/
+SELECT
+  station_name,
+  ridership_2016,
+  ridership_2017,
+  ridership_2018,
+  (ridership_2016 + ridership_2017 + ridership_2018) / 3 AS average_2016_2018
+FROM
+  bigquery-public-data.new_york_subway.subway_ridership_2013_present
+WHERE
+  station_name = 'Atlantic Av - Barclays Ctr'
+;
